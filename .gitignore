@@ -1,0 +1,22 @@
+# Build outputs
+src/c/misra_violations
+src/c/cert_c_violations
+src/cpp/autosar_violations
+src/cpp/cert_cpp_violations
+src/cpp/misra_cpp_violations
+*.o
+
+# CodeQL databases
+codeql-db-c/
+codeql-db-cpp/
+
+# SARIF results
+*.sarif
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,116 @@
+name: "CodeQL Coding Standards Analysis"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # ──────────────────────────────────────────────────────────────
+  #  Analyze C code with MISRA C and CERT C packs
+  # ──────────────────────────────────────────────────────────────
+  analyze-c:
+    name: Analyze C (MISRA C + CERT C)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL (C)
+        uses: github/codeql-action/init@v3
+        with:
+          languages: c-cpp
+          # Specify the coding standards packs to use.
+          # You can pin to a specific version, e.g. @2.38.0
+          packs: |
+            codeql/misra-c-coding-standards
+            codeql/cert-c-coding-standards
+
+      # Build only the C source files so the database covers C code.
+      - name: Build C sources
+        run: make c
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: c-coding-standards
+          output: sarif-results-c
+          upload: always
+
+  # ──────────────────────────────────────────────────────────────
+  #  Analyze C++ code with AUTOSAR, CERT C++ and MISRA C++ packs
+  # ──────────────────────────────────────────────────────────────
+  analyze-cpp:
+    name: Analyze C++ (AUTOSAR + CERT C++ + MISRA C++)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL (C++)
+        uses: github/codeql-action/init@v3
+        with:
+          languages: c-cpp
+          # Specify all three C++ coding standards packs.
+          packs: |
+            codeql/autosar-cpp-coding-standards
+            codeql/cert-cpp-coding-standards
+            codeql/misra-cpp-coding-standards
+
+      # Build only the C++ source files.
+      - name: Build C++ sources
+        run: make cpp
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: cpp-coding-standards
+          output: sarif-results-cpp
+          upload: always
+
+  # ──────────────────────────────────────────────────────────────
+  #  (Optional) Analyze C++ with a specific query suite
+  # ──────────────────────────────────────────────────────────────
+  analyze-cpp-suite:
+    name: Analyze C++ (AUTOSAR required-only suite)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL (C++)
+        uses: github/codeql-action/init@v3
+        with:
+          languages: c-cpp
+          # Use a specific query suite inside a pack.
+          # Format: <pack>@<version>:codeql-suites/<suite>.qls
+          #
+          # Available AUTOSAR suites:
+          #   autosar-default.qls      — all automated queries
+          #   autosar-audit.qls        — audit-only queries
+          #   autosar-advisory.qls     — advisory-level queries only
+          #   autosar-required.qls     — required-level queries only
+          #   autosar-single-translation-unit.qls
+          packs: |
+            codeql/autosar-cpp-coding-standards:codeql-suites/autosar-required.qls
+
+      - name: Build C++ sources
+        run: make cpp
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: cpp-autosar-required
+          output: sarif-results-cpp-required
+          upload: always
