@@ -25,11 +25,10 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: c-cpp
-          # Specify the coding standards packs to use.
-          # You can pin to a specific version, e.g. @2.38.0
-          packs: |
-            codeql/misra-c-coding-standards
-            codeql/cert-c-coding-standards
+          config: |
+            packs:
+              - codeql/misra-c-coding-standards@2.54.0
+              - codeql/cert-c-coding-standards@2.54.0
 
       # Build only the C source files so the database covers C code.
       - name: Build C sources
@@ -59,11 +58,11 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: c-cpp
-          # Specify all three C++ coding standards packs.
-          packs: |
-            codeql/autosar-cpp-coding-standards
-            codeql/cert-cpp-coding-standards
-            codeql/misra-cpp-coding-standards
+          config: |
+            packs:
+              - codeql/autosar-cpp-coding-standards@2.54.0
+              - codeql/cert-cpp-coding-standards@2.54.0
+              - codeql/misra-cpp-coding-standards@2.54.0
 
       # Build only the C++ source files.
       - name: Build C++ sources
@@ -102,8 +101,9 @@ jobs:
           #   autosar-advisory.qls     — advisory-level queries only
           #   autosar-required.qls     — required-level queries only
           #   autosar-single-translation-unit.qls
-          packs: |
-            codeql/autosar-cpp-coding-standards:codeql-suites/autosar-required.qls
+          config: |
+            packs:
+              - codeql/autosar-cpp-coding-standards@2.54.0:codeql-suites/autosar-required.qls
 
       - name: Build C++ sources
         run: make cpp
